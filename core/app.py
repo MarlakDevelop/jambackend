@@ -9,7 +9,7 @@ from apis import apiv1
 
 
 def create_app(config):
-    app = Flask(__name__.split('.')[0])
+    app = Flask(__name__)
     app.url_map.strict_slashes = False
     app.config.from_object(config)
     register_extensions(app)
@@ -39,6 +39,7 @@ def register_swagger(app: Flask):
     docs.register(target=apiv1.views.get_test, blueprint='api_v1')
     docs.register(target=apiv1.views.sign_up_user, blueprint='api_v1')
     docs.register(target=apiv1.views.sign_in_user, blueprint='api_v1')
+    docs.register(target=apiv1.views.check_username_for_unique, blueprint='api_v1')
     docs.register(target=apiv1.views.get_current_user, blueprint='api_v1')
     docs.register(target=apiv1.views.update_current_user_partial, blueprint='api_v1')
     docs.register(target=apiv1.views.get_user_by_fields, blueprint='api_v1')

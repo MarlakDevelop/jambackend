@@ -12,6 +12,7 @@ friendship_offer = db.Table('friendship_offer',
 class User(SurrogatePK, Model):
     __tablename__ = 'user'
 
+    id = db.Column(db.Integer, primary_key=True)
     username = Column(db.String(80), unique=True, nullable=False)
     password = Column(db.Binary(128), nullable=True)
     online = Column(db.Boolean, default=False, nullable=False)
@@ -21,7 +22,8 @@ class User(SurrogatePK, Model):
                                      primaryjoin=id == friendship_offer.c.offered_to,
                                      secondaryjoin=id == friendship_offer.c.offered_by,
                                      backref='offered_by',
-                                     lazy='dynamic')
+                                     lazy='dynamic'
+                                     )
     token: str = ''
 
     def __init__(self, username, password, **kwargs):

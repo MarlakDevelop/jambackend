@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from flask_apispec import doc, use_kwargs, marshal_with
 from flask_jwt_extended import (jwt_required, jwt_optional,
                                 create_access_token, current_user)
@@ -57,6 +57,11 @@ def sign_in_user(username: str, password: str, **kwargs):
         return result
     else:
         raise InvalidUsage.user_not_found()
+
+
+@blueprint.route('/users/check_username_for_unique/<username>', methods=('GET', 'OPTIONS'))
+def check_username_for_unique(username: str, **kwargs):
+    return jsonify(user_services.check_username_for_unique(username))
 
 
 @doc(description='Token access', params=auth_params_desc)

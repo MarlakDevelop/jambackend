@@ -28,9 +28,16 @@ def sign_in(username: str, password: str):
     user = User.query.filter_by(username=username).first()
     if user is not None and user.check_password(password):
         user.token = create_access_token(identity=user, fresh=True)
-        return user.token
+        return user
     else:
         return None
+
+
+def check_username_for_unique(username: str):
+    user = User.query.filter_by(username=username).first()
+    if user is not None:
+        return False
+    return True
 
 
 def update_user(user: User, **kwargs):
