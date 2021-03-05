@@ -34,7 +34,7 @@ def get_test():
     return 'Hello world!'
 
 
-@blueprint.route('/users/signup', methods=('POST', 'OPTIONS'))
+@blueprint.route('/users/signup', methods=('POST',))
 @use_kwargs(user_schema)
 @marshal_with(user_schema)
 def sign_up_user(username: str, password: str, **kwargs):
@@ -48,7 +48,7 @@ def sign_up_user(username: str, password: str, **kwargs):
         raise InvalidUsage.user_already_registered()
 
 
-@blueprint.route('/users/signin', methods=('POST', 'OPTIONS'))
+@blueprint.route('/users/signin', methods=('POST',))
 @use_kwargs(user_schema)
 @marshal_with(user_schema)
 def sign_in_user(username: str, password: str, **kwargs):
@@ -65,7 +65,7 @@ def check_username_for_unique(username: str, **kwargs):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/users/me', methods=('GET', 'OPTIONS'))
+@blueprint.route('/users/me', methods=('GET',))
 @jwt_required
 @marshal_with(user_schema)
 def get_current_user():
@@ -74,7 +74,7 @@ def get_current_user():
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/users/me', methods=('PATCH', 'OPTIONS'))
+@blueprint.route('/users/me', methods=('PATCH',))
 @jwt_required
 @use_kwargs(user_short_schema)
 @marshal_with(user_short_schema)
@@ -87,7 +87,7 @@ def update_current_user_partial(**kwargs):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/user', methods=('GET', 'OPTIONS'))
+@blueprint.route('/user', methods=('GET',))
 @jwt_required
 @use_kwargs(user_short_schema)
 @marshal_with(user_short_schema)
@@ -102,7 +102,7 @@ def get_user_by_fields(**kwargs):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/friendship_offers/create/<int:user_id>', methods=('POST', 'OPTIONS'))
+@blueprint.route('/friendship_offers/create/<int:user_id>', methods=('POST',))
 @jwt_required
 @marshal_with(user_short_schema)
 def make_friendship_offer(user_id: int):
@@ -111,7 +111,7 @@ def make_friendship_offer(user_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/friendship_offers/delete/<int:user_id>', methods=('DELETE', 'OPTIONS'))
+@blueprint.route('/friendship_offers/delete/<int:user_id>', methods=('DELETE',))
 @jwt_required
 @marshal_with(user_short_schema)
 def delete_friendship_offer(user_id: int):
@@ -120,7 +120,7 @@ def delete_friendship_offer(user_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/friendship_offers_to_me', methods=('GET', 'OPTIONS'))
+@blueprint.route('/friendship_offers_to_me', methods=('GET',))
 @jwt_required
 @use_kwargs({'search': fields.Str()})
 @marshal_with(users_short_schema)
@@ -130,7 +130,7 @@ def get_friendship_offers_to_me(search: str = ''):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/friends', methods=('GET', 'OPTIONS'))
+@blueprint.route('/friends', methods=('GET',))
 @jwt_required
 @use_kwargs({'search': fields.Str()})
 @marshal_with(users_short_schema)
@@ -140,7 +140,7 @@ def get_friends(search: str = ''):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/friendship_offers_by_me', methods=('GET', 'OPTIONS'))
+@blueprint.route('/friendship_offers_by_me', methods=('GET',))
 @jwt_required
 @use_kwargs({'search': fields.Str()})
 @marshal_with(users_short_schema)
@@ -150,7 +150,7 @@ def get_friendship_offers_by_me(search: str = ''):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/create_chat', methods=('GET', 'OPTIONS'))
+@blueprint.route('/create_chat', methods=('GET',))
 @jwt_required
 @use_kwargs(chat_schema)
 @marshal_with(chat_schema)
@@ -160,7 +160,7 @@ def create_chat():
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/leave_chat/<int:chat_id>', methods=('DELETE', 'OPTIONS'))
+@blueprint.route('/leave_chat/<int:chat_id>', methods=('DELETE',))
 @jwt_required
 def leave_chat(chat_id: int):
     user = current_user
@@ -168,7 +168,7 @@ def leave_chat(chat_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chats', methods=('GET', 'OPTIONS'))
+@blueprint.route('/chats', methods=('GET',))
 @jwt_required
 @use_kwargs({'search': fields.Str()})
 @marshal_with(chats_short_schema)
@@ -178,7 +178,7 @@ def get_chats(search: str = ''):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>', methods=('GET', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>', methods=('GET',))
 @jwt_required
 @marshal_with(chat_schema)
 def get_chat(chat_id: int):
@@ -187,7 +187,7 @@ def get_chat(chat_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/update_chat/<int:chat_id>', methods=('PATCH', 'OPTIONS'))
+@blueprint.route('/update_chat/<int:chat_id>', methods=('PATCH',))
 @jwt_required
 @use_kwargs(chat_schema)
 @marshal_with(chat_schema)
@@ -197,7 +197,7 @@ def update_chat(chat_id: int, **kwargs):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>/members', methods=('GET', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>/members', methods=('GET',))
 @jwt_required
 @marshal_with(users_short_schema)
 def get_chat_members(chat_id: int):
@@ -206,7 +206,7 @@ def get_chat_members(chat_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>/add_member/<int:user_id>', methods=('POST', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>/add_member/<int:user_id>', methods=('POST',))
 @jwt_required
 def add_chat_member(chat_id: int, user_id: int):
     user = current_user
@@ -214,7 +214,7 @@ def add_chat_member(chat_id: int, user_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>/remove_member/<int:user_id>', methods=('DELETE', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>/remove_member/<int:user_id>', methods=('DELETE',))
 @jwt_required
 def remove_chat_member(chat_id: int, user_id: int):
     user = current_user
@@ -222,7 +222,7 @@ def remove_chat_member(chat_id: int, user_id: int):
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>/messages', methods=('GET', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>/messages', methods=('GET',))
 @jwt_required
 @use_kwargs({'id_from': fields.Int(), 'limit': fields.Int(), 'offset': fields.Int()})
 @marshal_with(messages_schema)
@@ -232,7 +232,7 @@ def get_chat_messages(chat_id: int, id_from: int = None, limit: int = 20, offset
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/chat/<int:chat_id>/send_message', methods=('POST', 'OPTIONS'))
+@blueprint.route('/chat/<int:chat_id>/send_message', methods=('POST',))
 @jwt_required
 @use_kwargs(message_schema)
 @marshal_with(message_schema)
