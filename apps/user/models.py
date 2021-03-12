@@ -16,7 +16,7 @@ class User(SurrogatePK, Model):
     username = Column(db.String(80), unique=True, nullable=False)
     password = Column(db.Binary(128), nullable=True)
     online = Column(db.Boolean, default=False, nullable=False)
-    image = Column(db.String(120), nullable=True)
+    image = Column(db.Text, nullable=True)
     friendship_offers = relationship('User',
                                      secondary=friendship_offer,
                                      primaryjoin=id == friendship_offer.c.offered_to,

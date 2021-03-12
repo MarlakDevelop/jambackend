@@ -41,8 +41,12 @@ def check_username_for_unique(username: str):
 
 
 def update_user(user: User, **kwargs):
-    user.update(**kwargs)
-    return user
+    try:
+        user.update(**kwargs)
+        return user
+    except IntegrityError:
+        db.session.rollback()
+        return None
 
 
 def get_user_by_fields(**kwargs):

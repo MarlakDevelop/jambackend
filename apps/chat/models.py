@@ -16,16 +16,16 @@ class Chat(SurrogatePK, Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = Column(db.String(80), nullable=False)
-    image = Column(db.String(120), nullable=True)
+    image = Column(db.Text, nullable=True)
     messages = relationship(
         'Message',
-        backref=db.backref('chats', uselist=False),
+        backref=db.backref('chat_', uselist=False),
         lazy='dynamic'
     )
     members = relationship(
         'User',
         secondary=member_assoc,
-        backref=db.backref('chats', uselist=False),
+        backref=db.backref('chat_', uselist=False),
         lazy='dynamic'
     )
 
@@ -37,5 +37,6 @@ class Message(SurrogatePK, Model):
     text = Column(db.String, nullable=False)
     date_created = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+    chat = relationship('Chat', backref=db.backref('chat_messages'))
     author_id = reference_col('user', nullable=False)
-    author = relationship('User', backref=db.backref('messages'))
+    author = relationship('User', backref=db.backref('user_messages'))

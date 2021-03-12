@@ -7,6 +7,7 @@ def template(data, code=500):
 
 USER_NOT_FOUND = template(['User not found'], code=404)
 USER_ALREADY_REGISTERED = template(['User already registered'], code=422)
+USERNAME_ALREADY_TAKEN = template(['Username already taken'], code=422)
 SIGN_UP_DATA_IS_INVAlID = template(['The username must be more than 3 characters long and less than 33 characters long',
                                     'The password must be more than 7 characters long and less than 33 characters long'],
                                    code=400)
@@ -39,6 +40,10 @@ class InvalidUsage(Exception):
     @classmethod
     def user_already_registered(cls):
         return cls(**USER_ALREADY_REGISTERED)
+
+    @classmethod
+    def username_already_exists(cls):
+        return cls(**USERNAME_ALREADY_TAKEN)
 
     @classmethod
     def sign_up_data_is_invalid(cls):

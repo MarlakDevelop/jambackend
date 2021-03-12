@@ -79,11 +79,20 @@ def get_current_user():
 @use_kwargs(user_short_schema)
 @marshal_with(user_short_schema)
 def update_current_user_partial(**kwargs):
-    if not kwargs:
-        raise InvalidUsage.params_are_missed()
     user = current_user
+    if not kwargs['image']:
+        del kwargs['image']
+    elif (len(kwargs['image'].split('image/jpeg')) == 1 and
+          len(kwargs['image'].split('image/png')) == 1 and
+          len(kwargs['image'].split('image/jpg')) == 1):
+        del kwargs['image']
+    if not kwargs['username']:
+        del kwargs['username']
     result = user_services.update_user(user, **kwargs)
-    return result
+    if result:
+        return result
+    else:
+        raise InvalidUsage.username_already_exists()
 
 
 @doc(description='Token access', params=auth_params_desc)

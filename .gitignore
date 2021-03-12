@@ -1,3 +1,4 @@
 /migrations/
 /jam.db
 /.idea
+/Pipfile
