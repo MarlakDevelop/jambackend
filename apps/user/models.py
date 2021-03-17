@@ -21,7 +21,7 @@ class User(SurrogatePK, Model):
                                      secondary=friendship_offer,
                                      primaryjoin=id == friendship_offer.c.offered_to,
                                      secondaryjoin=id == friendship_offer.c.offered_by,
-                                     backref='offered_by',
+                                     backref=db.backref('friendship_offers_to_user', lazy='dynamic'),
                                      lazy='dynamic'
                                      )
     token: str = ''

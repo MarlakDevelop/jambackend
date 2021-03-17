@@ -7,7 +7,7 @@ class UserSchema(Schema):
     password = fields.Str(load_only=True)
     image = fields.Url()
     token = fields.Str(dump_only=True)
-    online = fields.Bool()
+    online = fields.Bool(dump_only=True)
 
     @pre_load
     def make_user(self, data, **kwargs):
@@ -29,7 +29,7 @@ class UserShortSchema(Schema):
     id = fields.Int(dump_only=True)
     username = fields.Str()
     image = fields.Str()
-    online = fields.Bool()
+    online = fields.Bool(dump_only=True)
 
     @pre_load
     def make_user(self, data, **kwargs):

@@ -57,21 +57,42 @@ def get_user_by_fields(**kwargs):
         return None
 
 
-def make_friendship_offer(user_by: User, user_to: User):
-    pass
+def make_friendship_offer(user_by: User, user_to_id: int):
+    user_to = User.query.filter_by(id=user_to_id).first()
+    if not user_to:
+        return False
+    if user_by.id == user_to.id:
+        return False
+    if user_to in user_by.friendship_offers.all():
+        return False
+    user_by.friendship_offers.append(user_to)
+    user_by.save()
+    return user_to
 
 
-def remove_friendship_offer(user_by, user_to):
-    pass
+def remove_friendship_offer(user_by: User, user_to_id: int):
+    user_to = User.query.filter_by(id=user_to_id).first()
+    if not user_to:
+        return False
+    if user_to not in user_by.friendship_offers.all():
+        return False
+    user_by.friendship_offers.remove(user_to)
+    user_by.save()
+    return user_to
 
 
-def get_friendship_offers_by_me(user: User):
-    pass
+def get_friendship_offers_by(user: User, search: str = ''):
+    offers = [x for x in user.friendship_offers.all() if user not in x.friendship_offers.all() and
+              search in x.username]
+    return offers
 
 
-def get_friendship_offers_to_me(user: User):
-    pass
+def get_friendship_offers_to(user: User, search: str = ''):
+    offers = [x for x in user.friendship_offers_to_user.all() if user not in x.friendship_offers_to_user.all() and
+              search in x.username]
+    return offers
 
 
-def get_friends(user: User):
-    pass
+def get_friends(user: User, search: str = ''):
+    friends = [x for x in user.friendship_offers.all() if user in x.friendship_offers.all() and search in x.username]
+    return friends

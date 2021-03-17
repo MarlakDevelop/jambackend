@@ -116,7 +116,11 @@ def get_user_by_fields(**kwargs):
 @marshal_with(user_short_schema)
 def make_friendship_offer(user_id: int):
     user = current_user
-    return '', 200
+    result = user_services.make_friendship_offer(user, user_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.user_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
@@ -125,41 +129,48 @@ def make_friendship_offer(user_id: int):
 @marshal_with(user_short_schema)
 def delete_friendship_offer(user_id: int):
     user = current_user
-    return '', 200
+    result = user_services.remove_friendship_offer(user, user_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.user_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/friendship_offers_to_me', methods=('GET',))
 @jwt_required
-@use_kwargs({'search': fields.Str()})
+@use_kwargs({'search': fields.Str()}, location='query')
 @marshal_with(users_short_schema)
 def get_friendship_offers_to_me(search: str = ''):
     user = current_user
-    return '', 200
+    result = user_services.get_friendship_offers_to(user, search)
+    return result
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/friends', methods=('GET',))
 @jwt_required
-@use_kwargs({'search': fields.Str()})
+@use_kwargs({'search': fields.Str()}, location='query')
 @marshal_with(users_short_schema)
 def get_friends(search: str = ''):
     user = current_user
-    return '', 200
+    result = user_services.get_friends(user, search)
+    return result
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/friendship_offers_by_me', methods=('GET',))
 @jwt_required
-@use_kwargs({'search': fields.Str()})
+@use_kwargs({'search': fields.Str()}, location='query')
 @marshal_with(users_short_schema)
 def get_friendship_offers_by_me(search: str = ''):
     user = current_user
-    return '', 200
+    result = user_services.get_friendship_offers_by(user, search)
+    return result
 
 
 @doc(description='Token access', params=auth_params_desc)
-@blueprint.route('/create_chat', methods=('GET',))
+@blueprint.route('/create_chat', methods=('POST',))
 @jwt_required
 @use_kwargs(chat_schema)
 @marshal_with(chat_schema)
