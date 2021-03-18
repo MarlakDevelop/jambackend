@@ -1,5 +1,16 @@
-def create_chat(user):
-    pass
+from sqlalchemy.exc import IntegrityError
+from core.database import db
+from apps.user.models import User
+from .models import Chat, Message
+
+
+def create_chat(user: User, name: str = 'Chat', image: str or None = None):
+    try:
+        chat = Chat(name=name, image=image)
+        chat.members.append()
+    except IntegrityError:
+        db.session.rollback()
+        return False
 
 
 def leave_chat(user, chat):

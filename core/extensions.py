@@ -3,6 +3,7 @@ from flask_caching import Cache
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy, Model
+from flask_socketio import SocketIO
 
 
 class CRUDMixin(Model):
@@ -36,6 +37,7 @@ db = SQLAlchemy(model_class=CRUDMixin)
 migrate = Migrate()
 cache = Cache()
 cors = CORS()
+socketio = SocketIO()
 
 
 from flask_jwt_extended import JWTManager

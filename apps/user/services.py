@@ -3,7 +3,7 @@ from flask_jwt_extended import (create_access_token)
 
 from core.database import db
 
-from .models import (User, friendship_offer)
+from .models import User
 
 
 def sign_up(username: str, password: str, **kwargs):

@@ -5,29 +5,26 @@ from core.database import (Column, Model,
                            relationship, reference_col)
 
 
-member_assoc = db.Table('member_assoc',
-                        db.Column('member_id', db.Integer, db.ForeignKey('user.id')),
-                        db.Column('chat_id', db.Integer, db.ForeignKey('chat.id')),
-                        db.Column('owner', db.Boolean, default=False))
-
-
 class Chat(SurrogatePK, Model):
     __tablename__ = 'chat'
 
     id = db.Column(db.Integer, primary_key=True)
     name = Column(db.String(80), nullable=False)
     image = Column(db.Text, nullable=True)
-    messages = relationship(
-        'Message',
-        backref=db.backref('chat_', uselist=False),
-        lazy='dynamic'
-    )
-    members = relationship(
-        'User',
-        secondary=member_assoc,
-        backref=db.backref('chat_', uselist=False),
-        lazy='dynamic'
-    )
+
+    def __init__(self, name, image, **kwargs):
+        db.Model.__init__(self, name=name, image=image, **kwargs)
+
+
+class Member(SurrogatePK, Model):
+    __tablename__ = 'member'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = reference_col('user', nullable=False)
+    member = relationship('Chat', backref=db.backref('membership'))
+    chat_id = reference_col('chat', nullable=False)
+    chat = relationship('Chat', backref=db.backref('members'))
+    owner = Column(db.Boolean, default=False)
 
 
 class Message(SurrogatePK, Model):
@@ -36,7 +33,7 @@ class Message(SurrogatePK, Model):
     id = db.Column(db.Integer, primary_key=True)
     text = Column(db.String, nullable=False)
     date_created = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
-    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
-    chat = relationship('Chat', backref=db.backref('chat_messages'))
+    chat_id = reference_col('chat', nullable=False)
+    chat = relationship('Chat', backref=db.backref('messages'))
     author_id = reference_col('user', nullable=False)
-    author = relationship('User', backref=db.backref('user_messages'))
+    author = relationship('User', backref=db.backref('messages'))
