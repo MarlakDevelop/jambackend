@@ -53,6 +53,28 @@ class UsersShortSchema(UserShortSchema):
         return {'users': data, 'count': len(data)}
 
 
+class MemberSchema(Schema):
+    member = fields.Nested(UserShortSchema)
+    owner = fields.Bool(dump_only=True)
+
+    @post_dump
+    def dump_member(self, data, **kwargs):
+        return {'member': data}
+
+    class Meta:
+        strict = True
+
+
+class MembersSchema(MemberSchema):
+    @post_dump
+    def dump_member(self, data, **kwargs):
+        return {'member': data}
+
+    @post_dump(pass_many=True)
+    def dump_members(self, data, **kwargs):
+        return {'members': data, 'count': len(data)}
+
+
 class MessageSchema(Schema):
     id = fields.Int(dump_only=True)
     chat_id = fields.Int(dump_only=True)
@@ -137,6 +159,9 @@ users_short_schema = UsersShortSchema(many=True)
 
 message_schema = MessageSchema(many=False)
 messages_schema = MessagesSchema(many=True)
+
+member_schema = MemberSchema(many=False)
+members_schema = MembersSchema(many=True)
 
 chat_schema = ChatSchema(many=False)
 chats_schema = ChatsSchema(many=True)

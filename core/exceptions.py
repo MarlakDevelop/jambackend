@@ -11,6 +11,9 @@ USERNAME_ALREADY_TAKEN = template(['Username already taken'], code=422)
 SIGN_UP_DATA_IS_INVAlID = template(['The username must be more than 3 characters long and less than 33 characters long',
                                     'The password must be more than 7 characters long and less than 33 characters long'],
                                    code=400)
+NAME_LEN_IS_INVALID = template(['Name must be more than 3 characters long and less than 33 characters long'],
+                                code=400)
+CHAT_NOT_FOUND = template(['Chat not found'], code=404)
 PARAMS_MISSED = template(['Parameters not defined, please add any params to your request'], code=400)
 UNKNOWN_ERROR = template([], code=500)
 
@@ -44,6 +47,14 @@ class InvalidUsage(Exception):
     @classmethod
     def username_already_exists(cls):
         return cls(**USERNAME_ALREADY_TAKEN)
+
+    @classmethod
+    def name_len_is_invalid(cls):
+        return cls(**NAME_LEN_IS_INVALID)
+
+    @classmethod
+    def chat_not_found(cls):
+        return cls(**CHAT_NOT_FOUND)
 
     @classmethod
     def sign_up_data_is_invalid(cls):

@@ -34,10 +34,10 @@ class Member(SurrogatePK, Model):
     __tablename__ = 'member'
 
     id = db.Column(db.Integer, primary_key=True)
-    member_id = reference_col('user', nullable=False)
+    member_id = reference_col('user', nullable=True)
     member = relationship('User',
                           backref=db.backref('membership', lazy='dynamic'))
-    chat_id = reference_col('chat', nullable=False)
+    chat_id = reference_col('chat', nullable=True)
     chat = relationship('Chat',
                         backref=db.backref('members', lazy='dynamic'))
     owner = Column(db.Boolean, default=False)
@@ -51,11 +51,11 @@ class Message(SurrogatePK, Model):
 
     id = db.Column(db.Integer, primary_key=True)
     text = Column(db.String, nullable=False)
-    date_created = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
-    chat_id = reference_col('chat', nullable=False)
+    date_created = Column(db.DateTime, nullable=False, default=dt.datetime.now)
+    chat_id = reference_col('chat', nullable=True)
     chat = relationship('Chat',
                         backref=db.backref('messages', lazy='dynamic'))
-    author_id = reference_col('user', nullable=False)
+    author_id = reference_col('user', nullable=True)
     author = relationship('User',
                           backref=db.backref('messages', lazy='dynamic'))
 

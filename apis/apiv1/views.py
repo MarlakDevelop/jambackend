@@ -5,8 +5,8 @@ from flask_jwt_extended import (jwt_required, jwt_optional,
 from marshmallow import fields
 
 from .serializers import (user_schema, user_short_schema, users_short_schema,
-                          message_schema, messages_schema, chat_schema,
-                          chats_schema, chat_short_schema, chats_short_schema)
+                          message_schema, messages_schema, member_schema, members_schema,
+                          chat_schema, chats_schema, chat_short_schema, chats_short_schema)
 from core.exceptions import InvalidUsage
 
 from apps.user import (models as user_models,
@@ -88,6 +88,8 @@ def update_current_user_partial(**kwargs):
         del kwargs['image']
     if not kwargs['username']:
         del kwargs['username']
+    if len(kwargs['username']) not in range(4, 33):
+        raise InvalidUsage.name_len_is_invalid()
     result = user_services.update_user(user, **kwargs)
     if result:
         return result
@@ -174,27 +176,47 @@ def get_friendship_offers_by_me(search: str = ''):
 @jwt_required
 @use_kwargs(chat_schema)
 @marshal_with(chat_schema)
-def create_chat():
+def create_chat(**kwargs):
     user = current_user
-    return '', 200
+    if not kwargs['image']:
+        del kwargs['image']
+    elif (len(kwargs['image'].split('image/jpeg')) == 1 and
+          len(kwargs['image'].split('image/png')) == 1 and
+          len(kwargs['image'].split('image/jpg')) == 1):
+        del kwargs['image']
+    if not kwargs['name']:
+        del kwargs['name']
+    if len(kwargs['name']) not in range(4, 33):
+        raise InvalidUsage.name_len_is_invalid()
+    result = chat_services.create_chat(user, **kwargs)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.unknown_error()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/leave_chat/<int:chat_id>', methods=('DELETE',))
 @jwt_required
+@marshal_with(chat_short_schema)
 def leave_chat(chat_id: int):
     user = current_user
-    return '', 200
+    result = chat_services.leave_chat(user, chat_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/chats', methods=('GET',))
 @jwt_required
-@use_kwargs({'search': fields.Str()})
+@use_kwargs({'search': fields.Str()}, location='query')
 @marshal_with(chats_short_schema)
 def get_chats(search: str = ''):
     user = current_user
-    return '', 200
+    result = chat_services.get_chats(user, search)
+    return result
 
 
 @doc(description='Token access', params=auth_params_desc)
@@ -203,7 +225,11 @@ def get_chats(search: str = ''):
 @marshal_with(chat_schema)
 def get_chat(chat_id: int):
     user = current_user
-    return '', 200
+    result = chat_services.get_chat(user, chat_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
@@ -213,32 +239,62 @@ def get_chat(chat_id: int):
 @marshal_with(chat_schema)
 def update_chat(chat_id: int, **kwargs):
     user = current_user
-    return '', 200
+    if not kwargs['image']:
+        del kwargs['image']
+    elif (len(kwargs['image'].split('image/jpeg')) == 1 and
+          len(kwargs['image'].split('image/png')) == 1 and
+          len(kwargs['image'].split('image/jpg')) == 1):
+        del kwargs['image']
+    if not kwargs['name']:
+        del kwargs['name']
+    if len(kwargs['name']) not in range(4, 33):
+        raise InvalidUsage.name_len_is_invalid()
+    result = chat_services.update_chat(user, chat_id, **kwargs)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/chat/<int:chat_id>/members', methods=('GET',))
 @jwt_required
-@marshal_with(users_short_schema)
+@marshal_with(members_schema)
 def get_chat_members(chat_id: int):
     user = current_user
-    return '', 200
+    result = chat_services.get_chat_members(user, chat_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/chat/<int:chat_id>/add_member/<int:user_id>', methods=('POST',))
 @jwt_required
+@marshal_with(member_schema)
 def add_chat_member(chat_id: int, user_id: int):
     user = current_user
-    return '', 200
+    result = chat_services.add_chat_member(user, chat_id, user_id)
+    if result:
+        return result
+    elif result is None:
+        raise InvalidUsage.user_not_found()
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/chat/<int:chat_id>/remove_member/<int:user_id>', methods=('DELETE',))
 @jwt_required
+@marshal_with(chat_schema)
 def remove_chat_member(chat_id: int, user_id: int):
     user = current_user
-    return '', 200
+    result = chat_services.remove_chat_member(user, chat_id, user_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
