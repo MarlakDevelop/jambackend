@@ -33,8 +33,10 @@ def leave_chat(user: User, chat_id: int):
 def send_message(user: User, text: str, chat_id: int):
     try:
         chat = Chat.query.filter_by(id=chat_id).first()
+        if not chat:
+            return False
         if not bool(chat.members.filter_by(member=user).count()):
-            raise IntegrityError
+            return False
         _message = Message(chat=chat, author=user, text=text)
         _message.save()
         return _message
@@ -76,13 +78,13 @@ def get_chat_members(user: User, chat_id: int):
         return False
     if not chat.members.filter_by(member=user).all():
         return False
-    return chat.members
+    return list(sorted(chat.members, key=lambda x: x.member.username))
 
 
 def add_chat_member(user: User, chat_id: int, user_id: int):
     friends = user_services.get_friends(user, '')
     user_new_member = User.query.filter_by(id=user_id).first()
-    chat = User.query.filter_by(id=chat_id).first()
+    chat = Chat.query.filter_by(id=chat_id).first()
     if not user_new_member:
         return None
     if user_new_member not in friends:
@@ -94,6 +96,7 @@ def add_chat_member(user: User, chat_id: int, user_id: int):
     if chat.members.filter_by(member=user_new_member).all():
         return False
     member = Member(chat=chat, member=user_new_member, owner=False)
+    member.save()
     return member
 
 
@@ -110,13 +113,11 @@ def remove_chat_member(user: User, chat_id: int, user_id: int):
     return chat
 
 
-def get_chat_messages(chat_id, id_from, offset, limit):
-    pass
-
-
-def is_chat_owner(chat, user):
-    pass
-
-
-def is_chat_member(chat, user):
-    pass
+def get_chat_messages(user: User, chat_id: int, id_from: int, offset: int, limit: int):
+    chat = Chat.query.filter_by(id=chat_id).first()
+    if not chat:
+        return False
+    if not chat.members.filter_by(member=user).all():
+        return False
+    messages = chat.messages.filter(Message.id >= id_from).offset(offset).limit(limit).all()
+    return list(sorted(messages, key=lambda x: x.id, reverse=True))

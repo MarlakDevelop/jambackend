@@ -29,11 +29,6 @@ auth_params_desc = {
 blueprint = Blueprint('api_v1', __name__, url_prefix='/api/v1')
 
 
-@blueprint.route('/test', methods=('GET',))
-def get_test():
-    return 'Hello world!'
-
-
 @blueprint.route('/users/signup', methods=('POST',))
 @use_kwargs(user_schema)
 @marshal_with(user_schema)
@@ -300,11 +295,15 @@ def remove_chat_member(chat_id: int, user_id: int):
 @doc(description='Token access', params=auth_params_desc)
 @blueprint.route('/chat/<int:chat_id>/messages', methods=('GET',))
 @jwt_required
-@use_kwargs({'id_from': fields.Int(), 'limit': fields.Int(), 'offset': fields.Int()})
+@use_kwargs({'id_from': fields.Int(), 'limit': fields.Int(), 'offset': fields.Int()}, location='query')
 @marshal_with(messages_schema)
 def get_chat_messages(chat_id: int, id_from: int = None, limit: int = 20, offset: int = 0):
     user = current_user
-    return '', 200
+    result = chat_services.get_chat_messages(user, chat_id, id_from, offset, limit)
+    if result is not False:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
 
 
 @doc(description='Token access', params=auth_params_desc)
@@ -314,4 +313,8 @@ def get_chat_messages(chat_id: int, id_from: int = None, limit: int = 20, offset
 @marshal_with(message_schema)
 def send_chat_message(chat_id: int, text: str, **kwargs):
     user = current_user
-    return '', 200
+    result = chat_services.send_message(user, text, chat_id)
+    if result:
+        return result
+    else:
+        raise InvalidUsage.chat_not_found()
