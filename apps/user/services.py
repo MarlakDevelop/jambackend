@@ -82,18 +82,18 @@ def remove_friendship_offer(user_by: User, user_to_id: int):
 
 
 def get_friendship_offers_by(user: User, search: str = ''):
-    offers = [x for x in user.friendship_offers.order_by(User.username).all()
-              if user not in x.friendship_offers.all() and search in x.username]
+    offers = [x for x in user.friendship_offers.filter(User.username.like(f'%{search}%')).order_by(User.username).all()
+              if user not in x.friendship_offers.all()]
     return offers
 
 
 def get_friendship_offers_to(user: User, search: str = ''):
-    offers = [x for x in user.friendship_offers_to_user.order_by(User.username).all()
-              if user not in x.friendship_offers_to_user.all() and search in x.username]
+    offers = [x for x in user.friendship_offers_to_user.filter(User.username.like(f'%{search}%')).order_by(User.username).all()
+              if user not in x.friendship_offers_to_user.all()]
     return offers
 
 
 def get_friends(user: User, search: str = ''):
-    friends = [x for x in user.friendship_offers.order_by(User.username).all()
-               if user in x.friendship_offers.all() and search in x.username]
+    friends = [x for x in user.friendship_offers.filter(User.username.like(f'%{search}%')).order_by(User.username).all()
+               if user in x.friendship_offers.all()]
     return friends

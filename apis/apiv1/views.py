@@ -14,6 +14,9 @@ from apps.user import (models as user_models,
 from apps.chat import (models as chat_models,
                        services as chat_services)
 
+from flask_socketio import SocketIO, emit
+from core.extensions import socketio
+
 auth_params_desc = {
     'Authorization': {
         'description':
@@ -318,3 +321,13 @@ def send_chat_message(chat_id: int, text: str, **kwargs):
         return result
     else:
         raise InvalidUsage.chat_not_found()
+
+
+@socketio.on('user_connect')
+def user_connect():
+    emit()
+
+
+@socketio.on('user_disconnect')
+def user_disconnect():
+    emit()

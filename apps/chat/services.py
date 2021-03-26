@@ -78,7 +78,7 @@ def get_chat_members(user: User, chat_id: int):
         return False
     if not chat.members.filter_by(member=user).all():
         return False
-    return list(sorted(chat.members, key=lambda x: x.member.username))
+    return chat.members.join(User).order_by(User.username).all()
 
 
 def add_chat_member(user: User, chat_id: int, user_id: int):
@@ -119,5 +119,9 @@ def get_chat_messages(user: User, chat_id: int, id_from: int, offset: int, limit
         return False
     if not chat.members.filter_by(member=user).all():
         return False
-    messages = chat.messages.filter(Message.id >= id_from).offset(offset).limit(limit).all()
-    return list(sorted(messages, key=lambda x: x.id, reverse=True))
+    if id_from == 0:
+        messages = chat.messages.order_by(Message.id.desc()).offset(offset).limit(limit).all()
+    else:
+        messages = chat.messages.filter(Message.id <= id_from).order_by(Message.id.desc()).offset(offset).limit(
+            limit).all()
+    return messages
