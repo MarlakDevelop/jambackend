@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+import functools
+from flask import Blueprint, request, jsonify, globals
 from flask_apispec import doc, use_kwargs, marshal_with
-from flask_jwt_extended import (jwt_required, jwt_optional,
-                                create_access_token, current_user)
+from flask_jwt_extended import (jwt_required, current_user,
+                                get_jwt_identity)
 from marshmallow import fields
 
 from .serializers import (user_schema, user_short_schema, users_short_schema,
@@ -14,8 +15,9 @@ from apps.user import (models as user_models,
 from apps.chat import (models as chat_models,
                        services as chat_services)
 
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, disconnect
 from core.extensions import socketio
+
 
 auth_params_desc = {
     'Authorization': {
@@ -118,6 +120,8 @@ def make_friendship_offer(user_id: int):
     user = current_user
     result = user_services.make_friendship_offer(user, user_id)
     if result:
+        socketio.emit(f'user/{user.id}/friendship_update')
+        socketio.emit(f'user/{user_id}/friendship_update')
         return result
     else:
         raise InvalidUsage.user_not_found()
@@ -131,6 +135,8 @@ def delete_friendship_offer(user_id: int):
     user = current_user
     result = user_services.remove_friendship_offer(user, user_id)
     if result:
+        socketio.emit(f'user/{user.id}/friendship_update')
+        socketio.emit(f'user/{user_id}/friendship_update')
         return result
     else:
         raise InvalidUsage.user_not_found()
@@ -187,7 +193,9 @@ def create_chat(**kwargs):
     if len(kwargs['name']) not in range(4, 33):
         raise InvalidUsage.name_len_is_invalid()
     result = chat_services.create_chat(user, **kwargs)
+    get_jwt_identity()
     if result:
+        socketio.emit(f'user/{user.id}/chats_update')
         return result
     else:
         raise InvalidUsage.unknown_error()
@@ -201,6 +209,8 @@ def leave_chat(chat_id: int):
     user = current_user
     result = chat_services.leave_chat(user, chat_id)
     if result:
+        socketio.emit(f'chat/{chat_id}/members_update')
+        socketio.emit(f'user/{user.id}/chats_update')
         return result
     else:
         raise InvalidUsage.chat_not_found()
@@ -249,6 +259,8 @@ def update_chat(chat_id: int, **kwargs):
         raise InvalidUsage.name_len_is_invalid()
     result = chat_services.update_chat(user, chat_id, **kwargs)
     if result:
+        for member in result.members:
+            socketio.emit(f'user/{member.member.id}/chats_update')
         return result
     else:
         raise InvalidUsage.chat_not_found()
@@ -275,6 +287,8 @@ def add_chat_member(chat_id: int, user_id: int):
     user = current_user
     result = chat_services.add_chat_member(user, chat_id, user_id)
     if result:
+        socketio.emit(f'user/{user_id}/chats_update')
+        socketio.emit(f'chat/{chat_id}/members_update')
         return result
     elif result is None:
         raise InvalidUsage.user_not_found()
@@ -290,6 +304,8 @@ def remove_chat_member(chat_id: int, user_id: int):
     user = current_user
     result = chat_services.remove_chat_member(user, chat_id, user_id)
     if result:
+        socketio.emit(f'user/{user_id}/chats_update')
+        socketio.emit(f'chat/{chat_id}/members_update')
         return result
     else:
         raise InvalidUsage.chat_not_found()
@@ -318,16 +334,51 @@ def send_chat_message(chat_id: int, text: str, **kwargs):
     user = current_user
     result = chat_services.send_message(user, text, chat_id)
     if result:
+        chat = chat_services.get_chat(user, chat_id)
+        for member in chat.members:
+            socketio.emit(f'user/{member.member.id}/chats_update')
+        socketio.emit(f'chat/{chat_id}/new_message', {'data': message_schema.dump(result)})
         return result
     else:
         raise InvalidUsage.chat_not_found()
 
 
-@socketio.on('user_connect')
-def user_connect():
-    emit()
+# Sockets
+import jwt
+from apps.user.models import User
+from apis.apiv1.serializers import UserSchema
+from functools import wraps
 
 
-@socketio.on('user_disconnect')
-def user_disconnect():
-    emit()
+def login_required(f):
+    @wraps(f)
+    def decorated(message):
+
+        try:
+            data = jwt.decode(message['token'], globals.current_app.config['SECRET_KEY'])
+            print(data)
+            try:
+                user = User.query.filter_by(id=data['id']).first()
+                globals.current_user = UserSchema().dump(user).data
+            except Exception as e:
+                return
+        except Exception as e:
+            return
+        return f(message)
+    return decorated
+
+
+# @socketio.on('connect')
+# @login_required
+# def on_connect(data):
+#     user = current_user
+#     result = user_services.user_online(user)
+#     socketio.emit(f'user_online/{result.id}')
+#
+#
+# @socketio.on('disconnect')
+# @login_required
+# def on_disconnect(data):
+#     user = current_user
+#     result = user_services.user_offline(user)
+#     socketio.emit(f'user_offline/{result.id}')

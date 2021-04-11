@@ -37,7 +37,10 @@ db = SQLAlchemy(model_class=CRUDMixin)
 migrate = Migrate()
 cache = Cache()
 cors = CORS()
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins=[
+        'http://0.0.0.0:4200',
+        'http://localhost:4200',
+    ])
 
 
 from flask_jwt_extended import JWTManager

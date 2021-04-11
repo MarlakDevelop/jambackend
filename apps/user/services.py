@@ -97,3 +97,15 @@ def get_friends(user: User, search: str = ''):
     friends = [x for x in user.friendship_offers.filter(User.username.like(f'%{search}%')).order_by(User.username).all()
                if user in x.friendship_offers.all()]
     return friends
+
+
+def user_online(user: User):
+    user.online = True
+    user.save()
+    return user
+
+
+def user_offline(user: User):
+    user.online = False
+    user.save()
+    return user

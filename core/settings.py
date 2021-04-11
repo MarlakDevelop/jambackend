@@ -25,3 +25,4 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{DB_PATH}'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(10 ** 6)
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024
+    SESSION_TYPE = 'filesystem'
