@@ -11,4 +11,4 @@ Session(app)
 socketio.init_app(app, manage_session=False, cors_allowed_origins="*")
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port='5000')
+    socketio.run(app)
