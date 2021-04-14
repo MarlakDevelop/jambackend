@@ -13,10 +13,7 @@ class Config(object):
     JWT_AUTH_USERNAME_KEY = 'username'
     JWT_AUTH_HEADER_PREFIX = 'Token'
     CORS_HEADERS = 'Content-Type'
-    CORS_ORIGIN_WHITELIST = [
-        'http://0.0.0.0:4200',
-        'http://localhost:4200',
-    ]
+    CORS_ORIGIN_WHITELIST = '*'
     JWT_HEADER_TYPE = 'Token'
     ENV = 'dev'
     DEBUG = True
